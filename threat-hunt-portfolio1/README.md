@@ -37,7 +37,7 @@ an investigation report and containment plan.
 
 ```
 External IP (20.110.92.50)
-        │  network logon as "helpdeska"
+        │  network logon as "helpdesk"
         ▼
    NPT-WS01 ── wmiprvse.exe → cmd.exe → WindowsUpdate.exe (implant)
         │
