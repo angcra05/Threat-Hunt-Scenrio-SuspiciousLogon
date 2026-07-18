@@ -274,7 +274,7 @@ DeviceProcessEvents
 |project TimeGenerated, ProcessCommandLine, DeviceName
 ```
 
-![Service persistence](screenshots/09-service-persistence.pn)
+![Service persistence](screenshots/09-service-persistence.png.png)
 
 ### 10 — Privilege escalation: backdoor account
 
