@@ -270,8 +270,8 @@ let HostInQuestion = "npt-ws01";
 DeviceProcessEvents
 |where TimeGenerated between (start_time ..end_time)
 |where DeviceName == HostInQuestion
-|where ProcessCommandLine contains "/tn"
-|project TimeGenerated, DeviceName, ProcessCommandLine, InitiatingProcessCommandLine
+|where ProcessCommandLine contains "sc.exe"
+|project TimeGenerated, ProcessCommandLine, DeviceName
 ```
 
 ![Service persistence](screenshots/09-service-persistence.png)
