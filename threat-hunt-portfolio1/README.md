@@ -286,6 +286,8 @@ Administrators — confirm a deliberate privilege-escalation step.
 
 **Finding:** local account `nexus_admin`, added to local Administrators.
 
+**Skill: Local account creation and privilege escalation.
+
 ```kql
 let start_time = datetime(2026-04-22T02:00:00.00Z);
 let end_time = datetime(2026-04-22T08:00:00.00Z);
@@ -309,6 +311,8 @@ Reviewing which hosts raised correlated alerts in the window identified a
 second affected system on the same fleet.
 
 **Finding:** `NPT-SRV01`
+
+**Skill:** Scoping an investigation across multiple hosts.
 
 ```kql
 let start_time = datetime(2026-04-22T02:00:00.00Z);
