@@ -170,6 +170,18 @@ Administrators — confirm a deliberate privilege-escalation step.
 
 **Finding:** local account `nexus_admin`, added to local Administrators.
 
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where LogonId == "999"
+|where ProcessCommandLine contains "net user"
+|project TimeGenerated, DeviceName, ProcessCommandLine
+```
+
 ![Account creation](screenshots/10-account-creation.png)
 
 ### 11 — Scoping: lateral movement
@@ -181,6 +193,21 @@ Reviewing which hosts raised correlated alerts in the window identified a
 second affected system on the same fleet.
 
 **Finding:** `NPT-SRV01`
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+AlertEvidence
+|where TimeGenerated between (start_time ..end_time)
+|where isnotempty(DeviceName)
+| join kind=inner (AlertInfo | where Timestamp between (start_time ..end_time)) on AlertId
+| summarize AlertCount = count(),
+            UniqueAlerts = dcount(AlertId),
+            AlertTitles = make_set(Title)
+          by DeviceName
+| sort by AlertCount desc
+```
 
 ![Lateral movement alert](screenshots/11-lateral-movement-alert.png)
 ![Lateral movement device](screenshots/11-lateral-movement-device.png)
