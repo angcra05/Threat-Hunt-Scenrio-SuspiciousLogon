@@ -169,6 +169,19 @@ initial logon.
 
 **Finding:** `updates.abordasync.website`
 
+**Skill: Outbound C2 (command & control); filtering legitimate Microsoft traffic; resolving the domain IOC.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceNetworkEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where InitiatingProcessAccountName == "helpdesk"
+|project TimeGenerated, DeviceName,RemoteUrl, InitiatingProcessCommandLine
+```
+
 ![C2 connection](screenshots/05-c2-connection.png)
 
 ### 6 — The dropped file
@@ -178,6 +191,19 @@ initial logon.
 
 **Finding:** `20cef6a013953890f9d38605d25d60dd63b42b09946bbb18ddb4a456da306e77`
 (written to `C:\Windows\Temp\WindowsUpdate.exe`)
+
+**Skill:** File drops in staging locations; network-delivered file attribution.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceFileEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where FolderPath contains "windowsupdate"
+|project TimeGenerated, DeviceName,FileName,FolderPath, InitiatingProcessCommandLine
+```
 
 ![File drop](screenshots/06-file-drop.png)
 
@@ -189,6 +215,18 @@ initial logon.
 **Finding:** Run key `WindowsHealthCheck`, disguised as a legitimate
 health/update task and pointing back at the Temp-folder implant.
 
+**Skill:** Registry Run-key persistence.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceRegistryEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where isnotempty(RegistryValueName)
+```
+
 ![Registry persistence](screenshots/07-registry-persistence.png)
 
 ### 8 — Persistence: scheduled task
@@ -199,6 +237,19 @@ health/update task and pointing back at the Temp-folder implant.
 **Finding:** `GoogleUpdaterTask` — named to impersonate a well-known
 legitimate updater.
 
+**Skill:** Scheduled-task persistence.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where ProcessCommandLine contains "/tn"
+|project TimeGenerated, DeviceName, ProcessCommandLine, InitiatingProcessCommandLine
+```
+
 ![Scheduled task](screenshots/08-scheduled-task.png)
 
 ### 9 — Persistence: Windows service
@@ -208,6 +259,20 @@ legitimate updater.
 
 **Finding:** service `WindowsHealthSvc`, again masquerading as a Windows
 health-monitoring component.
+
+**Skill:** Service-based persistence.
+
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where ProcessCommandLine contains "/tn"
+|project TimeGenerated, DeviceName, ProcessCommandLine, InitiatingProcessCommandLine
+```
 
 ![Service persistence](screenshots/09-service-persistence.png)
 
