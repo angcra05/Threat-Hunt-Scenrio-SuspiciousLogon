@@ -67,7 +67,19 @@ Filtering to successful logons in the window and isolating network-type
 interactively over the network — something that account has no legitimate
 reason to do.
 
-**Finding:** account `helpdeska`
+**Finding:** account `helpdesk`
+
+**Skill:** Authentication events; recognising a suspicious logon.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceLogonEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where ActionType contains "success"
+```
 
 ![Initial logon](screenshots/01-initial-logon.png)
 
@@ -77,6 +89,21 @@ reason to do.
 **Table / column:** `DeviceLogonEvents.RemoteIP`
 
 **Finding:** external IP `20.110.92.50`
+
+**Skill:** Tying a logon to an external source address.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceLogonEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where AccountName contains "helpdesk"
+|where ActionType contains "success"
+|where isnotempty( RemoteIP)
+|project TimeGenerated, AccountName, RemoteIP, RemoteIPType
+```
 
 ![External source IP](screenshots/02-external-source-ip.png)
 
@@ -91,6 +118,18 @@ quiet `cmd.exe /Q /c start` command launching a binary out of
 
 **Finding:** `cmd.exe /Q /c start "" "C:\Windows\Temp\WindowsUpdate.exe"`
 
+**Skill:** Process execution and command-line analysis
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where AccountName == "helpdesk"
+```
+
 ![Process execution](screenshots/03-process-execution.png)
 
 ### 4 — Confirming remote execution
@@ -103,6 +142,18 @@ confirms this was remote WMI-based execution rather than local, interactive
 activity.
 
 **Finding:** `wmiprvse.exe`
+
+**Skill:** Parent-child process relationships; reconstructing the chain.
+
+```kql
+let start_time = datetime(2026-04-22T02:00:00.00Z);
+let end_time = datetime(2026-04-22T08:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+|where TimeGenerated between (start_time ..end_time)
+|where DeviceName == HostInQuestion
+|where AccountName == "helpdesk"
+```
 
 ![Process tree](screenshots/04-process-tree.png)
 
